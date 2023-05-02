@@ -79,102 +79,55 @@ def homepage():
 
 @app.route("/Resources/hawaii.sqlite")
 def hawaii():
-    # Start session
     session = Session(engine)
-
-    # Query DB
-    one_year_prec = session.query(Measurement).filter(Measurement.date >= date_one_year).filter(Measurement.date <= recent_date_clean)
-
-    # Save query results
-    
-    prpc_dict = [{"date": x.date,
-                  "prcp": x.prcp} for x in one_year_prec]
-    
-    # Jsonify
-    return jsonify(prpc_dict )
-    
-    # Close session
+    yearprecip = session.query(Measurement).filter(Measurement.date >= date_one_year).filter(Measurement.date <= recent_date_clean)
+    precipdict = [{"date": x.date,
+                  "prcp": x.prcp} for x in yearprecip]
+    return jsonify(precipdict)
     session.close()
 
 
 @app.route("/api/v1.0/stations")
 def stations():
-    # Jsonify
     return jsonify(station_names)
     
 
 @app.route("/api/v1.0/tobs")
 def tobs():
-    # Start session
     session = Session(engine)
-    
-    # Query DB to retrieve last 12 months data
     last_12_months_tobs = session.query(Measurement).filter(Measurement.station == active_stations_df["station"][0]).filter(Measurement.date >= date_one_year).filter(Measurement.date <= recent_date_clean)
-
-    # Save query results
-    
     last_12_months = [{"date": x.date,
                   "tobs": x.tobs} for x in last_12_months_tobs]
-
-    # Jsonify
     return jsonify(last_12_months)
-    
-    # Close session
     session.close()
 
 @app.route("/api/v1.0/<start>")
 def start_date(start):
-    # Start session
     session = Session(engine)
-
-    # Query DB 
-    temp_data = session.query(Measurement.tobs).filter(Measurement.date >= str(start))
-
-    # Save query results
-    temp_data_list = [x[0] for x in temp_data]
-
-    # Calculate
-    max_temp = max(temp_data_list)
-    min_temp = min(temp_data_list)
-    mean_temp = statistics.mean(temp_data_list)
-    
-    # Summarize data
-    temp_data_dict = {"lowest value": min_temp,
+    temp = session.query(Measurement.tobs).filter(Measurement.date >= str(start))
+    temp_list = [x[0] for x in temp]
+    max_temp = max(temp_list)
+    min_temp = min(temp_list)
+    mean_temp = statistics.mean(temp_list)
+    temp_dict = {"lowest value": min_temp,
                       "highest value": max_temp,
                       "average": mean_temp}
-    
-    # Jsonify
-    return jsonify(temp_data_dict)
-
-    # Close session
+    return jsonify(temp_dict)
     session.close()
 
 
 @app.route("/api/v1.0/<start>/<end>")
 def end_date(start,end):
-    # Start session
     session = Session(engine)
-
-    # Query DB 
-    temp_data = session.query(Measurement.tobs).filter(Measurement.date >= str(start)).filter(Measurement.date <= str(end))
-
-    # Save query results
-    temp_data_list = [x[0] for x in temp_data]
-
-    # Calculate
-    max_temp = max(temp_data_list)
-    min_temp = min(temp_data_list)
-    mean_temp = statistics.mean(temp_data_list)
-    
-    # Summarize data
-    temp_data_dict = {"lowest value": min_temp,
+    temp = session.query(Measurement.tobs).filter(Measurement.date >= str(start)).filter(Measurement.date <= str(end))
+    temp_list = [x[0] for x in temp]
+    max_temp = max(temp_list)
+    min_temp = min(temp_list)
+    mean_temp = statistics.mean(temp_list)
+    temp_dict = {"lowest value": min_temp,
                       "highest value": max_temp,
                       "average": mean_temp}
-    
-    # Jsonify
-    return jsonify(temp_data_dict)
-
-    # Close session
+    return jsonify(temp_dict)
     session.close()
 
 
